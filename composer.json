@@ -1,0 +1,28 @@
+{
+    "name": "pagemill/accept",
+    "description": "Parses the HTTP Accept header and determes the preferred content type",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Brian Moon",
+            "email": "brianm@dealnews.com"
+        }
+    ],
+    "require": {
+        "pagemill/pattern": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "PageMill\\Accept\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PageMill\\Accept\\Tests\\": "tests/"
+        }
+    }
+}
