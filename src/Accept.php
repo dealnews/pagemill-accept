@@ -1,35 +1,32 @@
 <?php
 
+namespace PageMill\Accept;
+
 /**
+ * Parses the HTTP Accept header and determines
+ * the preferred content type
+ *
  * @author      Brian Moon <brianm@dealnews.com>
  * @copyright   1997-Present DealNews.com, Inc
  * @package     PageMill
  */
-
-namespace PageMill\Accept;
-
-use \PageMill\Pattern\Pattern;
-
-/**
- * Parses the HTTP Accept header and determes
- * the preferred content type
- */
 class Accept {
 
     /**
-     * Determines which of the valid content types is
-     * preferred by the client as indicated by the Accept header.
-     * @param  array      $valid_content_types Array of acceptable
-     *                                         content types
-     * @param  array|null $server              Optional array to use in place
-     *                                         of $_SERVER
-     * @return mixed      The preferred content type or false if none match
+     * Determines which of the valid content types is preferred by the client
+     * as indicated by the Accept header.
+     *
+     * @param  array       $valid_content_types Array of acceptable
+     *                                          content types
+     * @param  array|null  $server              Optional array to use in place
+     *                                          of $_SERVER (for testing)
+     * @return string|null The preferred content type or null if none match
      *
      * @suppress PhanParamSuspiciousOrder
      */
-    public function determine(array $valid_content_types, array $server = null) {
+    public function determine(array $valid_content_types, ?array $server = null): ?string {
 
-        $chosen_content_type = false;
+        $chosen_content_type = null;
 
         if (!empty($valid_content_types)) {
 
@@ -47,27 +44,25 @@ class Accept {
                 $server["HTTP_ACCEPT"] = "*/*";
             }
 
-            $content_type_preferences = $this->determine_preferred_content_types($server["HTTP_ACCEPT"]);
-
-            $pattern = new Pattern();
+            $content_type_preferences = $this->determinePreferredContentTypes($server["HTTP_ACCEPT"]);
 
             // match the accept list against the Accept header
             $preferred_content_types = [];
             foreach ($valid_content_types as $content_type) {
                 foreach ($content_type_preferences as $content_type_pattern => $quality) {
-                    $type = "exact";
+
                     $content_type_pattern = strtolower($content_type_pattern);
+
                     // if the pattern from the Accept header contains a *,
                     // convert this to a regex match
                     if (strpos($content_type_pattern, "*") !== false) {
                         $type = "regex";
                         $content_type_pattern = '|^'.str_replace($content_type_pattern, "*", ".+").'$|';
+                        $result = (bool)preg_match($content_type_pattern, strtolower($content_type));
+                    } else {
+                        $result = $content_type_pattern === strtolower($content_type);
                     }
-                    $result = $pattern->match(
-                        $type,
-                        [$content_type_pattern],
-                        strtolower($content_type)
-                    );
+
                     if ($result !== false) {
                         $preferred_content_types[$content_type] = $quality;
                     }
@@ -90,10 +85,12 @@ class Accept {
 
     /**
      * Parses an Accept header string
+     *
      * @param  string $accept_header Accept header value
+     *
      * @return array  Array of mime types and their preference value
      */
-    public function determine_preferred_content_types(string $accept_header) {
+    public function determinePreferredContentTypes(string $accept_header): array {
         // see https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
         $accept_content_types = explode(",", $accept_header);
         $content_type_preference = [];

@@ -43,7 +43,7 @@ class AcceptTest extends \PHPUnit\Framework\TestCase {
                     "text/html"
                 ],
                 "text/plain;q=0.1",
-                false,
+                null,
                 "No Match"
             ],
             [
