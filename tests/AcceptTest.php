@@ -36,7 +36,7 @@ class AcceptTest extends \PHPUnit\Framework\TestCase {
         );
     }
 
-    public function determineDataProvider() {
+    public static function determineDataProvider() {
         return [
             [
                 [
